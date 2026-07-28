@@ -4,7 +4,7 @@ Wires planner -> researcher -> writer into a graph.
 
 from langgraph.graph import StateGraph, START, END
 from graph.state import AgentState
-from graph.nodes import planner_node, researcher_node, writer_node
+from graph.nodes import planner_node, researcher_node, writer_node, should_retry
 
 
 def build_graph():
@@ -16,7 +16,11 @@ def build_graph():
 
     graph.add_edge(START, "planner")
     graph.add_edge("planner", "researcher")
-    graph.add_edge("researcher", "writer")
+    graph.add_conditional_edges(
+        "researcher",
+        should_retry,
+        {"researcher": "researcher", "writer": "writer"},
+    )
     graph.add_edge("writer", END)
 
     return graph.compile()
